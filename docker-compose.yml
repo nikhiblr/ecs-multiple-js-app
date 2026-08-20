@@ -1,0 +1,45 @@
+version: "3.9"
+
+# ── Local dev uses container names (app1/app2/app3)
+# ── ECS task uses localhost (all containers share network namespace)
+# ── vhosts.conf uses localhost — works for both because
+#    docker network_mode: host is set below for local parity
+
+services:
+
+  app1:
+    build: ./app1
+    container_name: mom-app1
+    environment:
+      PORT: "3001"
+      SITE_NAME: "Site 1"
+    network_mode: "host"
+    restart: unless-stopped
+
+  app2:
+    build: ./app2
+    container_name: mom-app2
+    environment:
+      PORT: "3002"
+      SITE_NAME: "Site 2"
+    network_mode: "host"
+    restart: unless-stopped
+
+  app3:
+    build: ./app3
+    container_name: mom-app3
+    environment:
+      PORT: "3003"
+      SITE_NAME: "Site 3"
+    network_mode: "host"
+    restart: unless-stopped
+
+  apache:
+    build: ./apache
+    container_name: mom-apache
+    network_mode: "host"
+    depends_on:
+      - app1
+      - app2
+      - app3
+    restart: unless-stopped

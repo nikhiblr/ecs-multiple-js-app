@@ -1,0 +1,106 @@
+{
+  "family": "mom-app",
+  "networkMode": "awsvpc",
+  "requiresCompatibilities": ["FARGATE"],
+  "cpu": "1024",
+  "memory": "2048",
+  "executionRoleArn": "arn:aws:iam::<ACCOUNT_ID>:role/ecsTaskExecutionRole",
+  "containerDefinitions": [
+    {
+      "name": "apache",
+      "image": "<ACCOUNT_ID>.dkr.ecr.<REGION>.amazonaws.com/mom-apache:latest",
+      "essential": true,
+      "portMappings": [
+        {
+          "containerPort": 80,
+          "protocol": "tcp"
+        }
+      ],
+      "dependsOn": [
+        { "containerName": "app1", "condition": "HEALTHY" },
+        { "containerName": "app2", "condition": "HEALTHY" },
+        { "containerName": "app3", "condition": "HEALTHY" }
+      ],
+      "logConfiguration": {
+        "logDriver": "awslogs",
+        "options": {
+          "awslogs-group": "/ecs/mom-app",
+          "awslogs-region": "<REGION>",
+          "awslogs-stream-prefix": "apache"
+        }
+      }
+    },
+    {
+      "name": "app1",
+      "image": "<ACCOUNT_ID>.dkr.ecr.<REGION>.amazonaws.com/mom-app1:latest",
+      "essential": true,
+      "environment": [
+        { "name": "PORT",      "value": "3001" },
+        { "name": "SITE_NAME", "value": "Site 1" }
+      ],
+      "healthCheck": {
+        "command": ["CMD-SHELL", "curl -f http://localhost:3001/health || exit 1"],
+        "interval": 10,
+        "timeout": 5,
+        "retries": 3,
+        "startPeriod": 15
+      },
+      "logConfiguration": {
+        "logDriver": "awslogs",
+        "options": {
+          "awslogs-group": "/ecs/mom-app",
+          "awslogs-region": "<REGION>",
+          "awslogs-stream-prefix": "app1"
+        }
+      }
+    },
+    {
+      "name": "app2",
+      "image": "<ACCOUNT_ID>.dkr.ecr.<REGION>.amazonaws.com/mom-app2:latest",
+      "essential": true,
+      "environment": [
+        { "name": "PORT",      "value": "3002" },
+        { "name": "SITE_NAME", "value": "Site 2" }
+      ],
+      "healthCheck": {
+        "command": ["CMD-SHELL", "curl -f http://localhost:3002/health || exit 1"],
+        "interval": 10,
+        "timeout": 5,
+        "retries": 3,
+        "startPeriod": 15
+      },
+      "logConfiguration": {
+        "logDriver": "awslogs",
+        "options": {
+          "awslogs-group": "/ecs/mom-app",
+          "awslogs-region": "<REGION>",
+          "awslogs-stream-prefix": "app2"
+        }
+      }
+    },
+    {
+      "name": "app3",
+      "image": "<ACCOUNT_ID>.dkr.ecr.<REGION>.amazonaws.com/mom-app3:latest",
+      "essential": true,
+      "environment": [
+        { "name": "PORT",      "value": "3003" },
+        { "name": "SITE_NAME", "value": "Site 3" }
+      ],
+      "healthCheck": {
+        "command": ["CMD-SHELL", "curl -f http://localhost:3003/health || exit 1"],
+        "interval": 10,
+        "timeout": 5,
+        "retries": 3,
+        "startPeriod": 15
+      },
+      "logConfiguration": {
+        "logDriver": "awslogs",
+        "options": {
+          "awslogs-group": "/ecs/mom-app",
+          "awslogs-region": "<REGION>",
+          "awslogs-stream-prefix": "app3"
+        }
+      }
+    }
+  ]
+}
